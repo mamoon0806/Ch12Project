@@ -1,15 +1,17 @@
 package edu.seminolestate.managepurchases;
-
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+
 
 public class ManagePurchase {
 	public static void displayMenu() {
@@ -19,7 +21,22 @@ public class ManagePurchase {
 	}
 	
 	public static void main(String[] args) {
+		String filename = "purchases.txt";
 		ArrayList<Purchase> list = new ArrayList<Purchase>();
+		File tmpDir = new File(filename);
+		boolean exists = tmpDir.exists();
+		if(exists) {
+			try(Scanner scanner = new Scanner(new File(filename))){
+				while(scanner.hasNextLine()) {
+					String line = scanner.nextLine();
+					
+				}
+			}
+			catch(FileNotFoundException e) {
+				System.out.println("File not found");
+			}
+		}
+		Format formatter = new SimpleDateFormat("yyyy-mm-dd");		
 		int input = 0;
 		int dateInt = 0;
 		LocalDate date = LocalDate.parse("2000-01-01");
@@ -86,7 +103,20 @@ public class ManagePurchase {
 				input = 0;
 			}
 			if(input == 3) {
-				
+				try (FileWriter fileWriter = new FileWriter(filename);
+					    PrintWriter printWriter = new PrintWriter(fileWriter)){
+					if(list.size() > 0) {
+						for(Purchase purchases : list) {
+							printWriter.println(purchases.getProductName() + "\n" 
+									+ purchases.getStoreName() + "\n"
+									+ formatter.format(purchases.getPurchaseDate()) + "\n"
+									+ Double.toString(purchases.getCost()));
+						}
+						printWriter.close();
+					}
+				} catch(IOException e) {
+					System.out.println("Error writing file " + e.getMessage());
+				}
 			}
 		}
 	}
