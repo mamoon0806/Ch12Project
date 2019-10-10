@@ -20,7 +20,7 @@ public class ManagePurchase {
 				+ "3 - Exit");
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InputMismatchException {
 		String filename = "purchases.txt";
 		ArrayList<Purchase> list = new ArrayList<Purchase>();
 		File tmpDir = new File(filename);
@@ -28,18 +28,30 @@ public class ManagePurchase {
 		if(exists) {
 			try(Scanner scanner = new Scanner(new File(filename))){
 				while(scanner.hasNextLine()) {
-					String line = scanner.nextLine();
+					String line1 = scanner.nextLine();
+					String line2 = scanner.nextLine();
+					LocalDate line3 = LocalDate.parse(scanner.nextLine());
+					double line4 = Double.parseDouble(scanner.nextLine());
 					
+					Purchase purchase = new Purchase(line1, line2, line3, line4);
+					list.add(purchase);
+			
 				}
 			}
-			catch(FileNotFoundException e) {
-				System.out.println("File not found");
+			catch(FileNotFoundException | IllegalPurchaseArgumentException e) {
+				System.out.println(e.getMessage());
 			}
 		}
 		Format formatter = new SimpleDateFormat("yyyy-mm-dd");		
 		int input = 0;
 		int dateInt = 0;
+		int productInt = 0;
+		int storeInt = 0;
+		int costInt = 0;
 		LocalDate date = LocalDate.parse("2000-01-01");
+		String productName = "";
+		String storeName = "";
+		double cost = 0;
 		Scanner sc = new Scanner(System.in);
 		while(true) {
 			if(input == 0) {
@@ -58,18 +70,37 @@ public class ManagePurchase {
 	
 			if(input == 1) {
 				try {
-					System.out.println("Enter a product name");
-					String productName = sc.next();
-					if(productName.length() < 1) {
-						throw new Exception();
+					while(productInt == 0) {
+						try {
+							System.out.println("Enter a product name");
+							productName = sc.next();
+							if(productName.length() < 1) {
+								throw new Exception();
+							}
+							productInt = 1;
+						} catch(Exception e) {
+							System.out.println("Enter a valid product name");
+							productInt = 0;
+						}
+
 					}
-					System.out.println("Enter a store name");
-					String storeName = sc.next();
-					if(storeName.length() < 1) {
-						throw new Exception();
+					while(storeInt == 0) {
+						try {
+							System.out.println("Enter a store name");
+							storeName = sc.next();
+							if(storeName.length() < 1) {
+								throw new Exception();
+							}
+							storeInt = 1;
+						} catch (Exception e) {
+							System.out.println("Enter a valid store name");
+							storeInt = 0;
+						}
+
+						
 					}
-					
-					if(dateInt == 0) {
+
+					while(dateInt == 0) {
 						try {
 							System.out.println("Enter a purchase date (FORMAT: 2000-01-01)");
 							String userDate = sc.next();
@@ -81,11 +112,21 @@ public class ManagePurchase {
 						}
 					}
 					
-					System.out.println("Enter a cost");
-					double cost = sc.nextDouble();
-					if(cost < 0) {
-						throw new Exception();
+					while(costInt == 0) {
+						try {
+							System.out.println("Enter a cost");
+							cost = Double.parseDouble(sc.next());
+							if(cost < 0) {
+								throw new Exception();
+							}
+							costInt = 1;
+						} catch(Exception e) {
+							System.out.println("Enter a valid cost");
+							costInt = 0;
+						}
+
 					}
+
 					Purchase purchase = new Purchase(productName, storeName, date, cost);
 					list.add(purchase);
 					input = 0;
@@ -109,10 +150,12 @@ public class ManagePurchase {
 						for(Purchase purchases : list) {
 							printWriter.println(purchases.getProductName() + "\n" 
 									+ purchases.getStoreName() + "\n"
-									+ formatter.format(purchases.getPurchaseDate()) + "\n"
+									+ purchases.getPurchaseDate().toString() + "\n"
 									+ Double.toString(purchases.getCost()));
 						}
 						printWriter.close();
+						System.out.println("Thank you for using the Purchase Tracker");
+						System.exit(0);
 					}
 				} catch(IOException e) {
 					System.out.println("Error writing file " + e.getMessage());
